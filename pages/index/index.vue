@@ -10,8 +10,16 @@
 			<input :value="schoolData" placeholder="此处显示选择的学校"/>
 		</view>
 		<view class="content-item">
-			<button type="primary" @click="showSchoolPicker">点击选择学校</button>
+			<button type="primary" @click="showSchoolPicker">只选择学校</button>
 		</view>
+		<view class="content-item">
+			<button type="primary" @click="showSchoolPicker2">选择省/市/大学</button>
+		</view>
+		
+		<!-- 学校选择组件(支持 全国与所有 选项)-->
+		<schoolPicker :onlySchool='false' themeColor="#000" ref="schoolPicker2" :pickerValueDefault="cityPickerValueDefault"
+		 @onConfirm="onConfirm2">
+		</schoolPicker>
 		
 		<!-- 学校选择组件-->
 		<schoolPicker themeColor="#000" ref="schoolPicker" :pickerValueDefault="cityPickerValueDefault"
@@ -43,8 +51,11 @@
 			showSchoolPicker:function(){
 				this.$refs.schoolPicker.show()
 			},
+			showSchoolPicker2:function(){
+				this.$refs.schoolPicker2.show()
+			},
 			/**
-			 * 确认选择
+			 * 只选择学校的 确认选择
 			 */
 			onConfirm(e) {
 				const school = e.label.split("-")[2];
@@ -54,6 +65,17 @@
 					this.schoolData = school;
 					this.jsonData=JSON.stringify(e);
 				}
+			},
+			/**
+			 * 省/市/大学 确认选择
+			 */
+			onConfirm2(e) {
+				let result = (e.label.split("-")).reverse();
+				result=result.find(v=>{
+					return v!=='所有';
+				})
+				this.schoolData = result;
+				this.jsonData=JSON.stringify(e);
 			}
 		}
 	}

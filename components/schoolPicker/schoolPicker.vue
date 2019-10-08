@@ -27,7 +27,7 @@
 	import provinceData from './city-data/province.js';
 	import cityData from './city-data/city.js';
 	import areaData from './city-data/area.js';
-	import schoolData from './school-data/schools.js';//学校数据
+	import schoolData from './school-data/schools.js'; //学校数据
 	export default {
 		data() {
 			return {
@@ -40,6 +40,10 @@
 			};
 		},
 		created() {
+			if(!this.onlySchool){
+				this.provinceDataList=[{label:'全国'}].concat(provinceData);
+				this.cityDataList=[{label:'所有'}].concat(cityData[0]);
+			}
 			this.init()
 		},
 		props: {
@@ -51,7 +55,11 @@
 				}
 			},
 			/* 主题色 */
-			themeColor: String
+			themeColor: String,
+			onlySchool: {
+				type: Boolean,
+				default: true
+			}
 		},
 		watch: {
 			pickerValueDefault() {
@@ -61,16 +69,30 @@
 		methods: {
 			init() {
 				this.handPickValueDefault(); // 对 pickerValueDefault 做兼容处理
-
+			
+				
 				const pickerValueDefault = this.pickerValueDefault
-
-				this.cityDataList = cityData[pickerValueDefault[0]];
+				
+				if (this.onlySchool) {
+					this.cityDataList = cityData[pickerValueDefault[0]];
+				} else {
+					this.cityDataList = [{
+						label: "所有"
+					}].concat(cityData[pickerValueDefault[0]-1]);
+				}
 				// this.areaDataList = areaData[pickerValueDefault[0]][pickerValueDefault[1]];
 				this.pickerValue = pickerValueDefault;
-				
+
 				//自定义绑定学校数据
-				this.areaDataList=this.getSchoolData()
-				
+				if (this.onlySchool) {
+					this.areaDataList = this.getSchoolData()
+				} else {
+					this.areaDataList = [{
+						label: "所有"
+					}].concat(this.getSchoolData())
+				}
+
+
 			},
 			show() {
 				setTimeout(() => {
@@ -117,7 +139,13 @@
 				let changePickerValue = e.mp.detail.value;
 				if (this.pickerValue[0] !== changePickerValue[0]) {
 					// 第一级发生滚动
-					this.cityDataList = cityData[changePickerValue[0]];
+					if (this.onlySchool) {
+						this.cityDataList = cityData[changePickerValue[0]];
+					} else {
+						this.cityDataList = [{
+							label: "所有"
+						}].concat(cityData[changePickerValue[0]-1]);
+					}
 					// this.areaDataList = areaData[changePickerValue[0]][0];
 					changePickerValue[1] = 0;
 					changePickerValue[2] = 0;
@@ -128,26 +156,38 @@
 					changePickerValue[2] = 0;
 				}
 				this.pickerValue = changePickerValue;
-				
-				//绑定学校数据
-				this.areaDataList=this.getSchoolData();
-				
+
+				//自定义绑定学校数据
+				if (this.onlySchool) {
+					this.areaDataList = this.getSchoolData()
+				} else {
+					this.areaDataList = [{
+						label: "所有"
+					}].concat(this.getSchoolData())
+				}
+
 				this._$emit('onChange');
 			},
 			/**
 			 * 自定义根据省市过滤大学数据
 			 */
-			getSchoolData:function(){
-				const {label:province}=this.provinceDataList[this.pickerValue[0]];
-				const {label:city}=this.cityDataList[this.pickerValue[1]];
-				const res =schoolData.filter(v=>{
-					return v.province===province&&v.city===city;
-				}).map(v=>{
+			getSchoolData: function() {
+				const {
+					label: province
+				} = this.provinceDataList[this.pickerValue[0]];
+				const {
+					label: city
+				} = this.cityDataList[this.pickerValue[1]];
+				const res = schoolData.filter(v => {
+					return v.province === province && v.city === city;
+				}).map(v => {
 					return {
-						label:v.name
+						label: v.name
 					}
 				})
-				return res.length===0?[{label:"暂未收录"}]:res;
+				return res.length === 0 ? this.onlySchool?[{
+					label: "暂未收录"
+				}]:[] : res;
 			},
 			_$emit(emitName) {
 				let pickObj = {
