@@ -76,9 +76,10 @@
 				if (this.onlySchool) {
 					this.cityDataList = cityData[pickerValueDefault[0]];
 				} else {
+					
 					this.cityDataList = [{
 						label: "所有"
-					}].concat(cityData[pickerValueDefault[0]-1]);
+					}].concat(pickerValueDefault[0]?cityData[pickerValueDefault[0]-1]:[]);
 				}
 				// this.areaDataList = areaData[pickerValueDefault[0]][pickerValueDefault[1]];
 				this.pickerValue = pickerValueDefault;
@@ -144,7 +145,7 @@
 					} else {
 						this.cityDataList = [{
 							label: "所有"
-						}].concat(cityData[changePickerValue[0]-1]);
+						}].concat(changePickerValue[0]?cityData[changePickerValue[0]-1]:[]);
 					}
 					// this.areaDataList = areaData[changePickerValue[0]][0];
 					changePickerValue[1] = 0;
